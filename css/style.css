@@ -1,0 +1,54 @@
+#content {
+  width: 755px ;
+  margin-left: auto ;
+  margin-right: auto ;
+}
+
+#words {
+  text-align: center;  
+}
+
+h1 {
+  text-align: center;  
+}
+
+.blokovi {
+  width:200px;
+  display: inline-block;  
+  height: 100px;  
+  vertical-align: middle;
+  text-align: center;  
+  
+}
+
+.blokovi-manji {
+  width:50px;
+  display: inline-block;  
+  height: 100px;  
+  vertical-align: middle;
+  text-align: center;    
+}
+
+.blokovi-manji p {
+  padding-top:5px;
+}
+
+a.recbut {
+	clear:both;
+	display:block;
+	padding:15px;
+	/*margin:0 10px 10px 0;*/
+	background:#E9E9E9;
+	border:1px solid #999999;
+	text-decoration:none;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size:30px;
+	line-height:26px;
+	text-align:center;
+	color:#000066;
+}
+
+a.recbut:hover {
+	color:#FFFFFF;
+	background:#999999;
+}
