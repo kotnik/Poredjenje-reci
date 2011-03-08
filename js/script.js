@@ -13,7 +13,7 @@ $(document).ready(function() {
   $("a.rec").live('click', function() {
     var word_id = this.id;
     var get_set = gup('set');
-    $("#words").html(ajax_load).load(loadUrl, "wordid=" + word_id + "&set=7");
+    $("#words").html(ajax_load).load(loadUrl, "wordid=" + word_id + "&set=" + get_set);
   });
 
 });

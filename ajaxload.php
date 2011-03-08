@@ -20,12 +20,14 @@ if ($get['wordid'] != 'startbut') {
 }
 
 $combs = comb_get($session, $get['set']);
-shuffle($combs);
-$show_comb = FALSE;
-foreach ($combs as $comb) {
-  if ($comb['answer_word_id'] == 0) {
-    $show_comb = $comb;
-    continue;
+if ($combs) {
+  shuffle($combs);
+  $show_comb = FALSE;
+  foreach ($combs as $comb) {
+    if ($comb['answer_word_id'] == 0) {
+      $show_comb = $comb;
+      continue;
+    }
   }
 }
 
