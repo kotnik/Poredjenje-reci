@@ -65,10 +65,8 @@ switch ($gets['action']) {
     $set['intro'] = '';
     $set['words'] = FALSE;
     $set['id'] = 0;
-
     $smarty->assign('set', $set);
     $smarty->display('admin-edit.tpl');
-
     break;
 
   case 'edit':
@@ -81,6 +79,20 @@ switch ($gets['action']) {
     $set = sets_get($gets['set']);
     $smarty->assign('set', $set);
     $smarty->display('admin-edit.tpl');
+    break;
+
+  case 'delete':
+    if (!isset($gets['set'])) {
+      redirect('admin/');
+    }
+    if (!$gets['set']) {
+      redirect('admin/');
+    }
+    $set = sets_get($gets['set']);
+    sets_delete($set);
+    $session['value']['message'] = 'Obrisao!';
+    sess_save_array($session);
+    redirect('admin/');
     break;
 
   default:

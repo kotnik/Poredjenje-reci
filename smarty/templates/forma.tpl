@@ -6,7 +6,7 @@
   </div>
   <div id="description">
     <p>Prvi put vas vidim i trebaju mi sledeći podaci.</p>
-    <form method="post" action="{$url}">
+    <form method="post" action="{$url}?set={$set}">
       <p>
         <label for="index">Vaš broj indexa:</label>
         <input type="text" name="index" id="index" />

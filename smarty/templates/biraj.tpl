@@ -1,14 +1,16 @@
 {include file='header.tpl'}
 
-<div id="content">
-  <div id="head">
-    <h1>Poređenje reči</h1>
-  </div>
-  <div id="description">
-    <p>Koji je življi?</p>
-  </div>
-  <div id="words">
-    <a id="startbut" href="#" class="recbut rec">Start</a><br />
+<div id="container">
+  <div id="content">
+    <div id="head">
+      <h1>{$question}</h1>
+    </div>
+    <div id="description">
+    </div>
+    <div id="words">
+      <p>{$intro}</p>
+      <a id="startbut" href="#" class="recbut rec">Start</a><br />
+    </div>
   </div>
 </div>
 

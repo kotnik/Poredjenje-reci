@@ -18,8 +18,13 @@ if (isset($post['name']) && isset($post['index'])) {
 
 $session = sess_load($sess_id);
 
-if ($session['value'] == '') {
+if ($session['value'] == '' && (isset($get['set']) && $get['set'] != '')) {
   $smarty->assign('url', $base_url);
+  if (isset($get['set'])) {
+    $smarty->assign('set', $get['set']);
+  } else {
+    $smarty->assign('set', '');
+  }
   $smarty->display('forma.tpl');
 } else {
   if (isset($get['set']) && $get['set']) {
@@ -29,8 +34,18 @@ if ($session['value'] == '') {
         $comb = comb_get($session, $get['set']);
       }
       if (comb_open_answers($comb)) {
+        $smarty->assign('intro', nl2br($last_set['intro']));
+        $smarty->assign('question', $last_set['question']);
         $smarty->display('biraj.tpl');
       } else {
+        $_SESSION = array();
+        if (ini_get("session.use_cookies")) {
+          $params = session_get_cookie_params();
+          setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+          );
+        }
         $smarty->assign('url', $base_url);
         $smarty->display('biraj-nema.tpl');
       }

@@ -65,6 +65,14 @@ function sess_load($sess_id) {
   return $session;
 }
 
+function sess_destroy($session) {
+  global $db;
+  if (is_array($session) && $session['id']) {
+    $sql = "DELETE FROM sessions WHERE id=".$session['id'];
+    $db->Execute($sql);
+  }  
+}
+
 /*
  *
  * SETS STUFF
@@ -159,6 +167,16 @@ function sets_insert($set) {
       }
     }
   }
+}
+
+function sets_delete($set) {
+  global $db;
+  $sql = 'DELETE FROM words WHERE set_id='.$set['id'];
+  $db->Execute($sql);
+  $sql = 'DELETE FROM combinations WHERE set_id='.$set['id'];
+  $db->Execute($sql);
+  $sql = 'DELETE FROM sets WHERE id='.$set['id'];
+  $db->Execute($sql);  
 }
 
 /*
