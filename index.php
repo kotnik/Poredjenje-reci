@@ -30,8 +30,8 @@ if ($session['value'] == '' && (isset($get['set']) && $get['set'] != '')) {
   if (isset($get['set']) && $get['set']) {
     if ($last_set = sets_get($get['set'])) {
       if (!$comb = comb_get($session, $get['set'])) {
-        comb_make($session, $get['set']);
-        $comb = comb_get($session, $get['set']);
+        //comb_make($session, $get['set']);
+        //$comb = comb_get($session, $get['set']);
       }
       if (comb_open_answers($comb)) {
         $smarty->assign('intro', nl2br($last_set['intro']));

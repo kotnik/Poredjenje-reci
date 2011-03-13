@@ -70,7 +70,7 @@ function sess_destroy($session) {
   if (is_array($session) && $session['id']) {
     $sql = "DELETE FROM sessions WHERE id=".$session['id'];
     $db->Execute($sql);
-  }  
+  }
 }
 
 /*
@@ -148,7 +148,7 @@ function sets_update($set) {
 /**
  * Insert set
  */
-function sets_insert($set) {
+function sets_insert($set, $subset_count=4) {
   global $db;
   $sql = 'INSERT INTO sets SET';
   $sql .= ' question = '. db_quote($set['question']);
@@ -166,6 +166,10 @@ function sets_insert($set) {
         $db->Execute($sql);
       }
     }
+    // Napravi kombinacije
+    comb_subset_make($set_id);
+    // Izdeli ih u setove
+    subsets_make($set_id, $subset_count);
   }
 }
 
@@ -176,7 +180,45 @@ function sets_delete($set) {
   $sql = 'DELETE FROM combinations WHERE set_id='.$set['id'];
   $db->Execute($sql);
   $sql = 'DELETE FROM sets WHERE id='.$set['id'];
-  $db->Execute($sql);  
+  $db->Execute($sql);
+}
+
+/*
+ *
+ * SUBSETS STUFF
+ *
+ */
+
+/**
+ * Make subsets from a set
+ */
+function subsets_make($set_id, $limit) {
+  global $db;
+  // Uzmi sve kombinacije
+  $set_id = (int) $set_id;
+  $sql = "SELECT * FROM subset_combinations WHERE set_id=$set_id";
+  $rs = $db->Execute($sql);
+  $counter = 0;
+  $subset_count = 1;
+  $subset_id = 0;
+  while (!$rs->EOF) {
+    if ($counter == 0) {
+      $title = 'Podset '.$subset_count;
+      $title = db_quote($title);
+      $db->Execute("INSERT INTO subsets SET set_id=$set_id, title=$title");
+      $subset_id = $db->Insert_ID();
+      $subset_count++;
+    }
+
+    $sql = "UPDATE subset_combinations SET subset_id=$subset_id WHERE id=".$rs->fields['id'];
+    $db->Execute($sql);
+
+    $counter++;
+    if ($counter >= $limit) {
+      $counter = 0;
+    }
+    $rs->MoveNext();
+  }
 }
 
 /*
@@ -233,6 +275,52 @@ function comb_make($session, $set_id) {
 
   foreach ($word_comb as $comb) {
     $sql = "INSERT INTO combinations SET session_id=".$session['id'].", ";
+    $sql .= "set_id=$set_id, ";
+    $sql .= "word1_id=".$comb['first']['id'].", ";
+    $sql .= "word2_id=".$comb['second']['id'];
+    $db->Execute($sql);
+  }
+}
+
+/**
+ * Make new subset combinations
+ */
+function comb_subset_make($set_id) {
+  global $db;
+  $set_id = (int)$set_id;
+
+  $word_comb = array();
+  $word_comb_col1 = array();
+  $word_comb_col2 = array();
+  $counter = 0;
+
+  $sql = "SELECT * FROM words WHERE set_id=$set_id";
+  $rs_words = $db->Execute($sql);
+  while (!$rs_words->EOF) {
+    $word_word = $rs_words->fields['word'];
+    $word_id = $rs_words->fields['id'];
+    $word_comb_col1[$counter]['id'] = $word_id;
+    $word_comb_col1[$counter++]['word'] = $word_word;
+    $rs_words->MoveNext();
+  }
+
+  $word_comb_col2 = $word_comb_col1;
+  shuffle($word_comb_col1);
+  shuffle($word_comb_col2);
+  $counter = 0;
+
+  foreach ($word_comb_col1 as $wid1 => $word_set1) {
+    foreach ($word_comb_col2 as $wid2 => $word_set2) {
+      if (_comb_dup_test($word_set1, $word_set2, $word_comb)) {
+        $word_comb[$counter]['first'] = $word_set1;
+        $word_comb[$counter++]['second'] = $word_set2;
+      }
+    }
+  }
+  shuffle($word_comb);
+
+  foreach ($word_comb as $comb) {
+    $sql = "INSERT INTO subset_combinations SET ";
     $sql .= "set_id=$set_id, ";
     $sql .= "word1_id=".$comb['first']['id'].", ";
     $sql .= "word2_id=".$comb['second']['id'];
