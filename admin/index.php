@@ -70,6 +70,7 @@ switch ($gets['action']) {
     break;
 
   case 'edit':
+    redirect('admin/');
     if (!isset($gets['set'])) {
       redirect('admin/');
     }
