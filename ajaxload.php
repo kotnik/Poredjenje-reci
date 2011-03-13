@@ -19,7 +19,9 @@ if ($get['wordid'] != 'startbut') {
   }
 }
 
-$combs = comb_get($session, $get['set']);
+$set_info = subset_get_set($get['set']);
+
+$combs = comb_get($session, $set_info['id'], $get['set']);
 if ($combs) {
   shuffle($combs);
   $show_comb = FALSE;

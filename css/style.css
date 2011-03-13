@@ -38,6 +38,10 @@ h1 {
   padding-top:5px;
 }
 
+.clean {
+  margin: 0;
+}
+
 a.recbut {
 	clear:both;
 	display:block;

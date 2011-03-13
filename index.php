@@ -28,14 +28,16 @@ if ($session['value'] == '' && (isset($get['set']) && $get['set'] != '')) {
   $smarty->display('forma.tpl');
 } else {
   if (isset($get['set']) && $get['set']) {
-    if ($last_set = sets_get($get['set'])) {
-      if (!$comb = comb_get($session, $get['set'])) {
-        //comb_make($session, $get['set']);
-        //$comb = comb_get($session, $get['set']);
+    $subset_id = $get['set'];
+    if ($last_set = subsets_get($subset_id)) {
+      $set_info = subset_get_set($subset_id);
+      if (!$comb = comb_get($session, $set_info['id'], $subset_id)) {
+        comb_copy($session, $subset_id, $set_info['id']);
+        $comb = comb_get($session, $set_info['id'], $subset_id);
       }
       if (comb_open_answers($comb)) {
-        $smarty->assign('intro', nl2br($last_set['intro']));
-        $smarty->assign('question', $last_set['question']);
+        $smarty->assign('intro', nl2br($set_info['intro']));
+        $smarty->assign('question', $set_info['question']);
         $smarty->display('biraj.tpl');
       } else {
         $_SESSION = array();
@@ -53,7 +55,7 @@ if ($session['value'] == '' && (isset($get['set']) && $get['set'] != '')) {
       $smarty->display('prazno.tpl');
     }
   } else {
-    if ($sets = sets_get_all()) {
+    if ($sets = subsets_get_all()) {
       $smarty->assign('sets', $sets);
       $smarty->assign('base_url', $base_url);
       $smarty->display('index.tpl');

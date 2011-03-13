@@ -148,7 +148,7 @@ function sets_update($set) {
 /**
  * Insert set
  */
-function sets_insert($set, $subset_count=4) {
+function sets_insert($set, $subset_count=250) {
   global $db;
   $sql = 'INSERT INTO sets SET';
   $sql .= ' question = '. db_quote($set['question']);
@@ -178,6 +178,8 @@ function sets_delete($set) {
   $sql = 'DELETE FROM words WHERE set_id='.$set['id'];
   $db->Execute($sql);
   $sql = 'DELETE FROM combinations WHERE set_id='.$set['id'];
+  $db->Execute($sql);
+  $sql = 'DELETE FROM subsets WHERE set_id='.$set['id'];
   $db->Execute($sql);
   $sql = 'DELETE FROM sets WHERE id='.$set['id'];
   $db->Execute($sql);
@@ -221,6 +223,51 @@ function subsets_make($set_id, $limit) {
   }
 }
 
+function subsets_get($subset_id) {
+  global $db;
+  $subset_id = (int)$subset_id;
+  $sql = "SELECT * FROM subsets WHERE id=$subset_id";
+  $rs = $db->Execute($sql);
+  if ($rs) {
+    $subset = array();
+    $subset['id'] = $rs->fields['id'];
+    $subset['title'] = $rs->fields['title'];
+    return $subset;
+  } else {
+    return FALSE;
+  }
+}
+
+function subset_get_set($subset_id) {
+  global $db;
+  $subset_id = (int)$subset_id;
+  $sql = "SELECT set_id FROM subsets WHERE id=$subset_id";
+  $rs_subset = $db->Execute($sql);
+  if ($rs_subset) {
+    $set_id = $rs_subset->fields['set_id'];
+    return sets_get($set_id);
+  }
+}
+
+function subsets_get_all() {
+  global $db;
+  $sql = "SELECT ss.id, ss.title FROM subsets ss INNER JOIN sets s ON s.id=ss.set_id WHERE s.active=1 ORDER BY ss.id ASC";
+  $rs = $db->Execute($sql);
+  $sets = array();
+  $counter = 0;
+  if ($rs->RecordCount()) {
+    $sets = array();
+    while (!$rs->EOF) {
+      $sets[$counter]['id'] = $rs->fields['id'];
+      $sets[$counter++]['title'] = $rs->fields['title'];
+      $rs->MoveNext();
+    }
+    return $sets;
+  } else {
+    return FALSE;
+  }
+}
+
 /*
  *
  * COMBINATIONS STUFF
@@ -234,6 +281,31 @@ function comb_clear($session) {
   global $db;
   $sql = "DELETE FROM combinations WHERE session_id=".$session['id'];
   $db->Execute($sql);
+}
+
+function comb_copy($session, $subset_id, $set_id) {
+  global $db;
+  $set_id = (int)$set_id;
+  $subset_id = (int)$subset_id;
+
+  $sql = "SELECT * FROM subset_combinations WHERE subset_id=$subset_id";
+  $rs = $db->Execute($sql);
+  $combs = array();
+  $counter = 0;
+  while (!$rs->EOF) {
+    $combs[$counter]['set_id'] = $rs->fields['set_id'];
+    $combs[$counter]['word1_id'] = $rs->fields['word1_id'];
+    $combs[$counter++]['word2_id'] = $rs->fields['word2_id'];
+    $rs->MoveNext();
+  }
+
+  $statement = $db->Prepare('INSERT INTO combinations (session_id, set_id, subset_id, word1_id, word2_id) VALUES (?, ?, ?, ?, ?)');
+  foreach ($combs as $comb) {
+    $set_id = $comb['set_id'];
+    $word1 = $comb['word1_id'];
+    $word2 = $comb['word2_id'];
+    $db->Execute($statement, array($session['id'], $set_id, $subset_id, $word1, $word2));
+  }
 }
 
 /**
@@ -346,10 +418,13 @@ function _comb_dup_test($w1, $w2, $combs) {
 /**
  * Get all set combinations for session
  */
-function comb_get($session, $set_id) {
+function comb_get($session, $set_id, $subset_id=0) {
   global $db;
   $set_id = (int)$set_id;
-  $sql = "SELECT * FROM combinations WHERE session_id=".$session['id']." AND set_id=$set_id ORDER BY id ASC";
+  if ($subset_id) {
+    $sql_add = " AND subset_id=$subset_id ";
+  }
+  $sql = "SELECT * FROM combinations WHERE session_id=".$session['id']." AND set_id=$set_id $sql_add ORDER BY id ASC";
   $rs = $db->Execute($sql);
   $combs = array();
   $counter = 0;
@@ -508,4 +583,25 @@ function redirect($query='') {
   global $base_url;
   header('Location: ' . $base_url . $query);
   die();
+}
+
+function time_start() {
+  $mtime = microtime();
+  $mtime = explode(" ",$mtime);
+  $mtime = $mtime[1] + $mtime[0];
+  $starttime = $mtime;
+  return $starttime;
+}
+
+function time_end($starttime) {
+  $mtime = microtime();
+  $mtime = explode(" ",$mtime);
+  $mtime = $mtime[1] + $mtime[0];
+  $endtime = $mtime;
+  $totaltime = ($endtime - $starttime);
+  if (function_exists('fb')) {
+    fb("This page was created in ".$totaltime." seconds");
+  } else {
+    echo "This page was created in ".$totaltime." seconds";
+  }
 }
