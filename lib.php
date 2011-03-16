@@ -148,7 +148,7 @@ function sets_update($set) {
 /**
  * Insert set
  */
-function sets_insert($set, $subset_count=250) {
+function sets_insert($set, $subset_count=257) {
   global $db;
   $sql = 'INSERT INTO sets SET';
   $sql .= ' question = '. db_quote($set['question']);

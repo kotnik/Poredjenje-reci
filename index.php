@@ -17,8 +17,11 @@ if (isset($post['name']) && isset($post['index'])) {
 }
 
 $session = sess_load($sess_id);
+if (!is_array($session['value'])) {
+  $session['value'] = array();
+}
 
-if ($session['value'] == '' && (isset($get['set']) && $get['set'] != '')) {
+if (($session['value'] == '' || empty($session['value'])) && (isset($get['set']) && $get['set'] != '')) {
   $smarty->assign('url', $base_url);
   if (isset($get['set'])) {
     $smarty->assign('set', $get['set']);
